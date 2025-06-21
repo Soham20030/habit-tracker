@@ -3,6 +3,7 @@ dotenv.config();
 import express from "express";
 import {connectDB, setupTables, db} from "./db/db.js";
 import authRoutes from './Routes/authRoutes.js';
+import habitRoutes from './Routes/habitRoutes.js';
 const app = express();
 
 // Add these middleware lines:
@@ -12,7 +13,9 @@ app.use(express.urlencoded({ extended: true })); // This parses form data
 await connectDB();
 await setupTables();
 
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
+
+app.use('/api', habitRoutes);
 
 app.get("/database", async (req, res) => {
     try {
