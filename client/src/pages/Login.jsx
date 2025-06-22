@@ -49,7 +49,7 @@ function Login() {
             onChange={(event) => setPassword(event.target.value)}
           />
 
-          <button type="submit" onSubmit={handleSubmit}>Submit</button>
+          <button type="submit">Submit</button>
         </form>
       </div>
     </>
