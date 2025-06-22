@@ -5,7 +5,13 @@ import {connectDB, setupTables, db} from "./db/db.js";
 import authRoutes from './Routes/authRoutes.js';
 import habitRoutes from './Routes/habitRoutes.js';
 import completionRoutes from "./Routes/completionRoutes.js";
+import cors from "cors";
 const app = express();
+
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
 
 // Add these middleware lines:
 app.use(express.json()); // This parses JSON bodies
