@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoutes";
 
 
 function App() {
@@ -10,9 +11,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home/>}/>
-        <Route path="/login" element={<Login/>}/>
-        <Route path="/register" element={<Register/>}/>
-        <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route path="/login" element={<ProtectedRoute redirectWhenLoggedIn={true}><Login/></ProtectedRoute>}/>
+        <Route path="/register" element={<ProtectedRoute redirectWhenLoggedIn={true}><Register/></ProtectedRoute>}/>
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
       </Routes>
     </BrowserRouter>
   )

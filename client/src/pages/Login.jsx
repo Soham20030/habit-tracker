@@ -1,8 +1,10 @@
-import {useState} from "react";
+import {useState, useContext} from "react";
 import {useNavigate} from "react-router-dom";
+import {AuthContext} from "../AuthContext";
 
 function Login() {
 
+  const {login} = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -22,7 +24,7 @@ function Login() {
 
     if(response.ok) {
       const data = await response.json();
-      localStorage.setItem('token', data.token);
+      login(data.token);
       navigate('/dashboard');
     } else {
     console.error('Login failed:', response);
