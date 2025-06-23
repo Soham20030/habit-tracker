@@ -37,10 +37,10 @@ app.use(express.urlencoded({ extended: true }));
 await connectDB();
 await setupTables();
 
-// Routes
+// Routes - Fixed mounting paths
 app.use('/api/auth', authRoutes);
-app.use('/api', habitRoutes);
-app.use('/api', completionRoutes);
+app.use('/api', habitRoutes);      // Keep as '/api' since routes already include '/habits'
+app.use('/api', completionRoutes); // Keep as '/api' since routes already include '/completions'
 
 // Test DB route
 app.get("/database", async (req, res) => {
