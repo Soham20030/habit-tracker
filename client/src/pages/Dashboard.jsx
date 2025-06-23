@@ -116,84 +116,106 @@ function Dashboard() {
     }
   };
 
-  const fetchTodaysCompletions = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const today = new Date().toISOString().split('T')[0];
-      
-      const response = await fetch(`${BASE_URL}/api/completions`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+const fetchTodaysCompletions = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const today = new Date().toISOString().split('T')[0];
+    
+    console.log('Fetching completions for date:', today);
+    
+    const response = await fetch(`${BASE_URL}/api/completions`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
 
-      if (response.ok) {
-        const allCompletions = await response.json();
-        
-        const todaysCompletions = {};
-        allCompletions.forEach(completion => {
-          const completionDate = new Date(completion.completed_date).toISOString().split('T')[0];
-          if (completionDate === today) {
-            todaysCompletions[completion.habit_id] = completion.completed;
-          }
+    console.log('Completions response status:', response.status);
+
+    if (response.ok) {
+      const allCompletions = await response.json();
+      console.log('All completions:', allCompletions);
+      
+      const todaysCompletions = {};
+      allCompletions.forEach(completion => {
+        const completionDate = new Date(completion.completed_date).toISOString().split('T')[0];
+        console.log('Processing completion:', {
+          completion,
+          completionDate,
+          today,
+          matches: completionDate === today
         });
         
-        setCompletions(todaysCompletions);
-      } else {
-        console.error('Failed to fetch completions');
-      }
-    } catch (error) {
-      console.error('Error fetching completions:', error);
-    }
-  };
-
-  const toggleCompletion = async (habitId) => {
-    try {
-      setCompletionLoading(prev => ({ ...prev, [habitId]: true }));
-      
-      const token = localStorage.getItem('token');
-      const today = new Date().toISOString().split('T')[0];
-      const currentStatus = completions[habitId] || false;
-      
-      const response = await fetch(`${BASE_URL}/api/habits/${habitId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          habitId: habitId,
-          date: today,
-          completed: !currentStatus
-        })
-      });
-
-      if (response.ok) {
-        setCompletions(prev => ({
-          ...prev,
-          [habitId]: !currentStatus
-        }));
-
-        // Trigger celebration animation if completing (not uncompleting)
-        if (!currentStatus) {
-          setJustCompleted(prev => ({ ...prev, [habitId]: true }));
-          setTimeout(() => {
-            setJustCompleted(prev => ({ ...prev, [habitId]: false }));
-          }, 600);
+        if (completionDate === today) {
+          todaysCompletions[completion.habit_id] = completion.completed;
         }
-
-        // Trigger refresh for all child components
-        setRefreshTrigger(prev => prev + 1);
-      } else {
-        setError('Failed to update completion status');
-      }
-    } catch (error) {
-      setError('Error updating completion status');
-    } finally {
-      setCompletionLoading(prev => ({ ...prev, [habitId]: false }));
+      });
+      
+      console.log('Today\'s completions:', todaysCompletions);
+      setCompletions(todaysCompletions);
+    } else {
+      console.error('Failed to fetch completions:', response.status);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching completions:', error);
+  }
+};
+
+const toggleCompletion = async (habitId) => {
+  try {
+    setCompletionLoading(prev => ({ ...prev, [habitId]: true }));
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('No authentication token found');
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const currentStatus = completions[habitId] || false;
+
+    const response = await fetch(`${BASE_URL}/api/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        habitId: habitId,
+        date: today,
+        completed: !currentStatus
+      })
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      setCompletions(prev => ({
+        ...prev,
+        [habitId]: !currentStatus
+      }));
+
+      if (!currentStatus) {
+        setJustCompleted(prev => ({ ...prev, [habitId]: true }));
+        setTimeout(() => {
+          setJustCompleted(prev => ({ ...prev, [habitId]: false }));
+        }, 600);
+      }
+
+      setRefreshTrigger(prev => prev + 1);
+      setError('');
+    } else {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      setError(`Failed to update completion status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error updating completion status:', error);
+    setError(`Error updating completion status: ${error.message}`);
+  } finally {
+    setCompletionLoading(prev => ({ ...prev, [habitId]: false }));
+  }
+};
+
 
   const startEditing = (habit) => {
     setEditingHabit(habit.id);
