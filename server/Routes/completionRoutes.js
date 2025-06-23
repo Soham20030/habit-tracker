@@ -24,7 +24,7 @@ router.post("/completions", async(req, res)=>{
 
 
         if(habitCheck.rows.length === 0) {
-            res.status(404).json({message: "Habit not found or dosen't belong to user"});
+            return res.status(404).json({message: "Habit not found or dosen't belong to user"});
         }
 
 const existingCompletion = await db.query("SELECT * FROM completions WHERE habit_id = $1 AND completed_date = $2", [            habitId,
