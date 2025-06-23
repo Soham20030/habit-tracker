@@ -1,0 +1,244 @@
+/* Rainforest-inspired Home Page Styles */
+
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f4f1 0%, #e8f5e8 100%);
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(120, 190, 120, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(104, 159, 56, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(139, 195, 74, 0.05) 0%, transparent 50%);
+  padding: 2rem 1rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.home-content {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 4rem 3rem;
+  box-shadow: 
+    0 8px 32px rgba(76, 132, 76, 0.1),
+    0 4px 16px rgba(139, 195, 74, 0.05);
+  border: 1px solid rgba(139, 195, 74, 0.1);
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: slideUp 0.8s ease-out;
+}
+
+.home-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #8BC34A, #4CAF50, #689F38);
+  border-radius: 24px 24px 0 0;
+}
+
+.home-header {
+  margin-bottom: 3rem;
+}
+
+.home-header h1 {
+  color: #2E5D2E;
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  background: linear-gradient(135deg, #2E5D2E 0%, #4CAF50 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.home-header p {
+  color: #5A7C5A;
+  font-size: 1.25rem;
+  margin: 0;
+  opacity: 0.9;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.home-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.home-button {
+  padding: 1.125rem 2.5rem;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-button.login {
+  background: linear-gradient(135deg, #8BC34A 0%, #4CAF50 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(139, 195, 74, 0.3);
+}
+
+.home-button.login:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(139, 195, 74, 0.4);
+  background: linear-gradient(135deg, #7CB342 0%, #43A047 100%);
+}
+
+.home-button.signup {
+  background: rgba(255, 255, 255, 0.9);
+  color: #2E5D2E;
+  border: 2px solid rgba(139, 195, 74, 0.3);
+  box-shadow: 0 4px 16px rgba(139, 195, 74, 0.1);
+}
+
+.home-button.signup:hover {
+  transform: translateY(-3px);
+  background: rgba(139, 195, 74, 0.1);
+  border-color: #8BC34A;
+  box-shadow: 0 8px 28px rgba(139, 195, 74, 0.2);
+  color: #2E5D2E;
+}
+
+.home-button:active {
+  transform: translateY(-1px);
+}
+
+/* Feature highlights */
+.home-features {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(139, 195, 74, 0.1);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.feature-item {
+  padding: 1rem;
+  background: rgba(139, 195, 74, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(139, 195, 74, 0.1);
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  transform: translateY(-2px);
+  background: rgba(139, 195, 74, 0.08);
+  border-color: rgba(139, 195, 74, 0.2);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.feature-text {
+  color: #2E5D2E;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .home-content {
+    padding: 3rem 2rem;
+    margin: 1rem;
+  }
+  
+  .home-header h1 {
+    font-size: 2.5rem;
+  }
+  
+  .home-header p {
+    font-size: 1.1rem;
+  }
+  
+  .home-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .home-button {
+    width: 100%;
+    max-width: 280px;
+    padding: 1rem 2rem;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-content {
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+  }
+  
+  .home-header h1 {
+    font-size: 2rem;
+  }
+  
+  .home-header p {
+    font-size: 1rem;
+  }
+  
+  .home-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover effect for the entire card */
+.home-content:hover {
+  box-shadow: 
+    0 12px 40px rgba(76, 132, 76, 0.12),
+    0 6px 20px rgba(139, 195, 74, 0.08);
+  transform: translateY(-2px);
+  transition: all 0.4s ease;
+}
+
+/* Focus states for accessibility */
+.home-button:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(139, 195, 74, 0.2);
+}

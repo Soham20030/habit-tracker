@@ -5,6 +5,9 @@ import HabitCalendar from '../components/HabitCalender';
 import StreakCounter from '../components/StreakCounter';
 import ProgressStats from '../components/ProgressStats';
 import Charts from '../components/Charts';
+import '../styles/dashboard.css';
+import Navbar from '../components/Navbar';
+import Footer from "../components/Footer";
 
 function Dashboard() {
   const {logout} = useContext(AuthContext);
@@ -21,6 +24,10 @@ function Dashboard() {
   const [editingHabit, setEditingHabit] = useState(null); 
   const [editName, setEditName] = useState(''); 
   const [editDescription, setEditDescription] = useState(''); 
+  const [justCompleted, setJustCompleted] = useState({});
+  
+  // Add refresh trigger state
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     fetchUserProfile();
@@ -34,32 +41,33 @@ function Dashboard() {
   }, [userHabits]);
 
   const handleAddHabit = async (e) => {
-  e.preventDefault();
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:5000/api/habits', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: habitName,
-        description: habitDescription
-      })
-    });
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/habits', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: habitName,
+          description: habitDescription
+        })
+      });
 
-    if (response.ok) {
-      setHabitName('');
-      setHabitDescription('');
-      fetchHabits();
-    } else {
-      setError('Failed to add habit');
+      if (response.ok) {
+        setHabitName('');
+        setHabitDescription('');
+        setShowAddForm(false);
+        fetchHabits();
+      } else {
+        setError('Failed to add habit');
+      }
+    } catch (err) {
+      setError('Error adding habit');
     }
-  } catch (err) {
-    setError('Error adding habit');
-  }
-};
+  };
 
   const fetchHabits = async() => {
     try {
@@ -78,7 +86,7 @@ function Dashboard() {
          setError("Failed to fetch user Habits");
       }
     } catch (error) {
-      setError('Error connectin to server');
+      setError('Error connecting to server');
     }
   };
 
@@ -100,379 +108,353 @@ function Dashboard() {
         setError("Failed to fetch user profile");
       }
     } catch (error) {
-      setError('Error connectin to server');
+      setError('Error connecting to server');
     } finally {
       setLoading(false);
     }
   };
 
   const fetchTodaysCompletions = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-    
-    const response = await fetch(`http://localhost:5000/api/completions`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (response.ok) {
-      const allCompletions = await response.json();
+    try {
+      const token = localStorage.getItem('token');
+      const today = new Date().toISOString().split('T')[0];
       
-      const todaysCompletions = {};
-      allCompletions.forEach(completion => {
-        const completionDate = new Date(completion.completed_date).toISOString().split('T')[0];
-        if (completionDate === today) {
-          todaysCompletions[completion.habit_id] = completion.completed;
+      const response = await fetch(`http://localhost:5000/api/completions`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+
+      if (response.ok) {
+        const allCompletions = await response.json();
+        
+        const todaysCompletions = {};
+        allCompletions.forEach(completion => {
+          const completionDate = new Date(completion.completed_date).toISOString().split('T')[0];
+          if (completionDate === today) {
+            todaysCompletions[completion.habit_id] = completion.completed;
+          }
+        });
+        
+        setCompletions(todaysCompletions);
+      } else {
+        console.error('Failed to fetch completions');
+      }
+    } catch (error) {
+      console.error('Error fetching completions:', error);
+    }
+  };
+
+  const toggleCompletion = async (habitId) => {
+    try {
+      setCompletionLoading(prev => ({ ...prev, [habitId]: true }));
       
-      setCompletions(todaysCompletions);
-    } else {
-      console.error('Failed to fetch completions');
-    }
-  } catch (error) {
-    console.error('Error fetching completions:', error);
-  }
-};
+      const token = localStorage.getItem('token');
+      const today = new Date().toISOString().split('T')[0];
+      const currentStatus = completions[habitId] || false;
+      
+      const response = await fetch('http://localhost:5000/api/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          habitId: habitId,
+          date: today,
+          completed: !currentStatus
+        })
+      });
 
-const toggleCompletion = async (habitId) => {
-  try {
-    // Set loading state for this specific habit
-    setCompletionLoading(prev => ({ ...prev, [habitId]: true }));
-    
-    const token = localStorage.getItem('token');
-    const today = new Date().toISOString().split('T')[0];
-    const currentStatus = completions[habitId] || false;
-    
-    const response = await fetch('http://localhost:5000/api/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        habitId: habitId,        // Changed from habit_id to habitId
-        date: today,            // Changed from completed_date to date
-        completed: !currentStatus
-      })
-    });
+      if (response.ok) {
+        setCompletions(prev => ({
+          ...prev,
+          [habitId]: !currentStatus
+        }));
 
-    if (response.ok) {
-      // Update the completion status in state
-      setCompletions(prev => ({
-        ...prev,
-        [habitId]: !currentStatus
-      }));
-    } else {
-      setError('Failed to update completion status');
-    }
-  } catch (error) {
-    setError('Error updating completion status');
-  } finally {
-    // Clear loading state for this habit
-    setCompletionLoading(prev => ({ ...prev, [habitId]: false }));
-  }
-};
+        // Trigger celebration animation if completing (not uncompleting)
+        if (!currentStatus) {
+          setJustCompleted(prev => ({ ...prev, [habitId]: true }));
+          setTimeout(() => {
+            setJustCompleted(prev => ({ ...prev, [habitId]: false }));
+          }, 600);
+        }
 
-// Start editing a habit
-const startEditing = (habit) => {
-  setEditingHabit(habit.id);
-  setEditName(habit.name);
-  setEditDescription(habit.description);
-};
-
-// Cancel editing
-const cancelEditing = () => {
-  setEditingHabit(null);
-  setEditName('');
-  setEditDescription('');
-};
-
-const saveEdit = async (habitId) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:5000/api/habits/${habitId}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: editName,
-        description: editDescription
-      })
-    });
-
-    if (response.ok) {
-      // Reset editing state
-      setEditingHabit(null);
-      setEditName('');
-      setEditDescription('');
-      // Refresh habits list
-      fetchHabits();
-    } else {
-      setError('Failed to update habit');
-    }
-  } catch (error) {
-    setError('Error updating habit');
-  }
-};
-
-const deleteHabit = async (habitId) => {
-  // Show confirmation dialog
-  if (!window.confirm('Are you sure you want to delete this habit? This action cannot be undone.')) {
-    return; // User cancelled, don't delete
-  }
-
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:5000/api/habits/${habitId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        // Trigger refresh for all child components
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        setError('Failed to update completion status');
       }
-    });
-
-    if (response.ok) {
-      // If we were editing this habit, cancel the edit
-      if (editingHabit === habitId) {
-        cancelEditing();
-      }
-      // Refresh habits list
-      fetchHabits();
-    } else {
-      setError('Failed to delete habit');
+    } catch (error) {
+      setError('Error updating completion status');
+    } finally {
+      setCompletionLoading(prev => ({ ...prev, [habitId]: false }));
     }
-  } catch (error) {
-    setError('Error deleting habit');
-  }
-};
+  };
 
+  const startEditing = (habit) => {
+    setEditingHabit(habit.id);
+    setEditName(habit.name);
+    setEditDescription(habit.description);
+  };
+
+  const cancelEditing = () => {
+    setEditingHabit(null);
+    setEditName('');
+    setEditDescription('');
+  };
+
+  const saveEdit = async (habitId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/habits/${habitId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: editName,
+          description: editDescription
+        })
+      });
+
+      if (response.ok) {
+        setEditingHabit(null);
+        setEditName('');
+        setEditDescription('');
+        fetchHabits();
+      } else {
+        setError('Failed to update habit');
+      }
+    } catch (error) {
+      setError('Error updating habit');
+    }
+  };
+
+  const deleteHabit = async (habitId) => {
+    if (!window.confirm('Are you sure you want to delete this habit? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/habits/${habitId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        if (editingHabit === habitId) {
+          cancelEditing();
+        }
+        fetchHabits();
+      } else {
+        setError('Failed to delete habit');
+      }
+    } catch (error) {
+      setError('Error deleting habit');
+    }
+  };
 
   const handleLogout = () => {
     logout(); 
     navigate('/login'); 
-};
+  };
 
   const {isLoggedIn} = useContext(AuthContext);
-return (
- <>
-  <h1>Welcome back, {loading ? 'Loading...' : user ? user.username : 'User'}!</h1>
   
-  {/* Error display */}
-  {error && (
-    <div style={{
-      backgroundColor: '#ffebee',
-      color: '#c62828',
-      padding: '10px',
-      borderRadius: '4px',
-      marginBottom: '20px',
-      border: '1px solid #f44336'
-    }}>
-      {error}
-    </div>
-  )}
+  return (
+    <>
+        <Navbar/>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <h1>Welcome back, {loading ? 'Loading...' : user ? user.username : 'User'}!</h1>
+      </div>
+      
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
 
-  {/* Charts Section - Always visible when there are habits */}
-  {userHabits.length > 0 && (
-    <Charts habits={userHabits} />
-  )}
+      {userHabits.length > 0 && (
+        <div className="charts-section">
+          <Charts habits={userHabits} refreshTrigger={refreshTrigger} />
+        </div>
+      )}
 
-  {userHabits.length > 0 ? (
-    <div>
-      <h2>Your Habits</h2>
-        <button onClick={() => setShowAddForm(!showAddForm)}>
-          {showAddForm ? 'Cancel' : 'Add New Habit'}
-        </button>
-            {showAddForm && (
-      <form onSubmit={handleAddHabit}>
-        <input
-          type="text"
-          placeholder="Habit name"
-          value={habitName}
-          onChange={(e) => setHabitName(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Description"
-          value={habitDescription}
-          onChange={(e) => setHabitDescription(e.target.value)}
-        />
-        <button type="submit">Add Habit</button>
-      </form>
-    )}
+      {userHabits.length > 0 ? (
+        <div className="habits-section">
+          <div className="section-header">
+            <h2>Your Habits</h2>
+            <button 
+              className={`add-habit-btn ${showAddForm ? 'cancel' : ''}`}
+              onClick={() => setShowAddForm(!showAddForm)}
+            >
+              {showAddForm ? 'Cancel' : 'Add New Habit'}
+            </button>
+          </div>
+
+          {showAddForm && (
+            <div className="add-habit-form">
+              <h3>Add New Habit</h3>
+              <form onSubmit={handleAddHabit}>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    placeholder="Enter habit name..."
+                    value={habitName}
+                    onChange={(e) => setHabitName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <textarea
+                    placeholder="Add a description (optional)..."
+                    value={habitDescription}
+                    onChange={(e) => setHabitDescription(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+                <div className="form-actions">
+                  <button type="button" className="btn-secondary" onClick={() => setShowAddForm(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-primary">
+                    Add Habit
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
    
-{userHabits.map(habit => (
-  <div key={habit.id} style={{
-    border: '1px solid #ccc', 
-    padding: '15px', 
-    margin: '10px 0',
-    borderRadius: '8px',
-    backgroundColor: completions[habit.id] ? '#f0f8f0' : '#fff'
-  }}>
-    {editingHabit === habit.id ? (
-      // Edit form when habit is being edited
-      <div>
-        <h3>Edit Habit</h3>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          saveEdit(habit.id);
-        }}>
-          <input
-            type="text"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            placeholder="Habit name"
-            required
-            style={{ 
-              width: '100%', 
-              padding: '8px', 
-              marginBottom: '10px',
-              border: '1px solid #ddd',
-              borderRadius: '4px'
-            }}
-          />
-          <textarea
-            value={editDescription}
-            onChange={(e) => setEditDescription(e.target.value)}
-            placeholder="Description"
-            rows={3}
-            style={{ 
-              width: '100%', 
-              padding: '8px', 
-              marginBottom: '10px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              resize: 'vertical'
-            }}
-          />
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button type="submit" style={{
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
-              Save Changes
-            </button>
-            <button type="button" onClick={cancelEditing} style={{
-              backgroundColor: '#f44336',
-              color: 'white',
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    ) : (
-      // Normal habit display when not editing
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <input
-          type="checkbox"
-          checked={completions[habit.id] || false}
-          onChange={() => toggleCompletion(habit.id)}
-          disabled={completionLoading[habit.id]}
-          style={{ 
-            width: '20px', 
-            height: '20px',
-            cursor: completionLoading[habit.id] ? 'wait' : 'pointer'
-          }}
-        />
-        <div style={{ flex: 1 }}>
-          <h3 style={{ 
-            margin: '0 0 5px 0',
-            textDecoration: completions[habit.id] ? 'line-through' : 'none',
-            color: completions[habit.id] ? '#666' : '#000'
-          }}>
-            {habit.name}
-          </h3>
-          <p style={{ 
-            margin: '0',
-            color: completions[habit.id] ? '#666' : '#333'
-          }}>
-            {habit.description}
-          </p>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
-          <div style={{ fontSize: '12px', color: '#666' }}>
-            {completionLoading[habit.id] ? 'Updating...' : 
-             completions[habit.id] ? '✅ Done today!' : 'Not completed'}
-          </div>
-          <div style={{ display: 'flex', gap: '5px' }}>
-            <button 
-              onClick={() => startEditing(habit)}
-              style={{
-                backgroundColor: '#2196F3',
-                color: 'white',
-                border: 'none',
-                padding: '4px 8px',
-                borderRadius: '3px',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
-            >
-              Edit
-            </button>
-            <button 
-              onClick={() => deleteHabit(habit.id)}
-              style={{
-                backgroundColor: '#f44336',
-                color: 'white',
-                border: 'none',
-                padding: '4px 8px',
-                borderRadius: '3px',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
-            >
-              Delete
-            </button>
+          <div className="habits-grid">
+            {userHabits.map(habit => (
+              <div 
+                key={habit.id} 
+                className={`habit-card ${completions[habit.id] ? 'completed' : ''} ${justCompleted[habit.id] ? 'just-completed' : ''}`}
+              >
+                {editingHabit === habit.id ? (
+                  <div className="add-habit-form">
+                    <h3>Edit Habit</h3>
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      saveEdit(habit.id);
+                    }}>
+                      <div className="form-group">
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          placeholder="Habit name"
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <textarea
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          placeholder="Description"
+                          rows={3}
+                        />
+                      </div>
+                      <div className="form-actions">
+                        <button type="button" className="btn-secondary" onClick={cancelEditing}>
+                          Cancel
+                        </button>
+                        <button type="submit" className="btn-primary">
+                          Save Changes
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                ) : (
+                  <>
+                    <div className="habit-content">
+                      <div 
+                        className={`habit-checkbox ${completions[habit.id] ? 'checked' : ''} ${completionLoading[habit.id] ? 'loading' : ''}`}
+                        onClick={() => !completionLoading[habit.id] && toggleCompletion(habit.id)}
+                      />
+                      <div className="habit-info">
+                        <h3 className={`habit-name ${completions[habit.id] ? 'completed' : ''}`}>
+                          {habit.name}
+                        </h3>
+                        <p className={`habit-description ${completions[habit.id] ? 'completed' : ''}`}>
+                          {habit.description}
+                        </p>
+                      </div>
+                      <div className="habit-actions">
+                        <div className={`habit-status ${completions[habit.id] ? 'completed' : ''}`}>
+                          {completionLoading[habit.id] ? 'Updating...' : 
+                           completions[habit.id] ? '✅ Done today!' : 'Not completed'}
+                        </div>
+                        <div className="habit-buttons">
+                          <button 
+                            className="btn-small btn-edit"
+                            onClick={() => startEditing(habit)}
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            className="btn-small btn-delete"
+                            onClick={() => deleteHabit(habit.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="habit-components">
+                      <StreakCounter habitId={habit.id} habitName={habit.name} refreshTrigger={refreshTrigger} />
+                      <HabitCalendar habitId={habit.id} habitName={habit.name} refreshTrigger={refreshTrigger} />
+                      <ProgressStats habitId={habit.id} habitName={habit.name} refreshTrigger={refreshTrigger} />
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
         </div>
-        <StreakCounter habitId={habit.id} habitName={habit.name} />
-        <HabitCalendar habitId={habit.id} habitName={habit.name} />
-        <ProgressStats habitId={habit.id} habitName={habit.name} />
-      </div>
-    )}
-  </div>
-      ))}
+      ) : (
+        <div className="empty-state">
+          <h2>Start Your Habit Journey!</h2>
+          <p>Create your first habit to get started</p>
+          <form onSubmit={handleAddHabit} className="add-habit-form">
+            <div className="form-group">
+              <input
+                type="text"
+                placeholder="Enter habit name..."
+                value={habitName}
+                onChange={(e) => setHabitName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <textarea
+                placeholder="Add a description (optional)..."
+                value={habitDescription}
+                onChange={(e) => setHabitDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="form-actions">
+              <button type="submit" className="btn-primary">
+                Add Your First Habit
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
-  ) : (
-    <div>
-      <h2>Start Your Habit Journey!</h2>
-      <p>Create your first habit to get started</p>
-      <form onSubmit={handleAddHabit}>
-        <input
-          type="text"
-          placeholder="Habit name"
-          value={habitName}
-          onChange={(e) => setHabitName(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Description"
-          value={habitDescription}
-          onChange={(e) => setHabitDescription(e.target.value)}
-        />
-        <button type="submit">Add Habit</button>
-      </form>
-    </div>
-  )}
-  <button onClick={handleLogout}>Logout</button>
- </>
-)
+    <Footer showAccountSection={false} />
+    </>
+
+  );
 }
 
 export default Dashboard

@@ -1,25 +1,50 @@
 import { Link } from "react-router-dom";
+import '../styles/home.css'
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function Home() {
   return (
     <>
-      <div>
-        <h1>Welcome to Habit Tracker</h1>
-        <p>Track your daily habits and build consistency</p>
+    <Navbar/>
+     <div className="home-container">
+      <div className="home-content">
+        <div className="home-header">
+          <h1>Welcome to HabitGrow</h1>
+          <p>Track your daily habits and build consistency for a better you</p>
+        </div>
 
-        <div>
-          <Link to="/login">
-            <button>Login</button>
+        <div className="home-buttons">
+          <Link to="/login" className="home-button login">
+            Login
           </Link>
-
-          <Link to="/register">
-            <button>Sign up</button>
+          <Link to="/register" className="home-button signup">
+            Sign Up
           </Link>
         </div>
-      </div>
-    </>
-  )
-}
 
+        <div className="home-features">
+          <div className="features-grid">
+            <div className="feature-item">
+              <span className="feature-icon">✅</span>
+              <p className="feature-text">Track Daily</p>
+            </div>
+            <div className="feature-item">
+              <span className="feature-icon">📈</span>
+              <p className="feature-text">See Progress</p>
+            </div>
+            <div className="feature-item">
+              <span className="feature-icon">🎯</span>
+              <p className="feature-text">Build Consistency</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <Footer/>
+    </>
+    
+  );
+}
 
 export default Home;

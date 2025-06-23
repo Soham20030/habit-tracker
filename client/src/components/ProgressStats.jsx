@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import '../styles/progressStats.css';
 
-function ProgressStats({ habitId, habitName }) {
+function ProgressStats({ habitId, habitName, refreshTrigger }) {
   const [stats, setStats] = useState({
     totalCompletions: 0,
     currentStreak: 0,
@@ -24,6 +25,13 @@ function ProgressStats({ habitId, habitName }) {
       calculateProgressStats();
     }
   }, [habitId, timeRange]);
+
+  // Add this new useEffect to listen for refreshTrigger changes
+  useEffect(() => {
+    if (habitId && refreshTrigger) {
+      calculateProgressStats();
+    }
+  }, [refreshTrigger]);
 
   const calculateProgressStats = async () => {
     try {
@@ -199,35 +207,29 @@ function ProgressStats({ habitId, habitName }) {
 
   if (loading) {
     return (
-      <div style={{ padding: '15px', border: '1px solid #ddd', borderRadius: '8px', margin: '10px 0' }}>
-        <h4>📊 Progress Stats - Loading...</h4>
+      <div className="progress-stats-loading">
+        <h4>Loading...</h4>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ padding: '15px', border: '1px solid #f44336', borderRadius: '8px', margin: '10px 0', backgroundColor: '#ffebee' }}>
-        <h4>📊 Progress Stats - Error</h4>
-        <p style={{ color: '#f44336', margin: '5px 0' }}>{error}</p>
+      <div className="progress-stats-error">
+        <h4>Error</h4>
+        <p>{error}</p>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      padding: '15px', 
-      border: '1px solid #ddd', 
-      borderRadius: '8px', 
-      margin: '10px 0',
-      backgroundColor: '#f9f9f9'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-        <h4 style={{ margin: 0 }}>📊 Progress Stats: {habitName}</h4>
+    <div className="progress-stats-container">
+      <div className="progress-stats-header">
+        <h4>{habitName}</h4>
         <select 
           value={timeRange} 
           onChange={(e) => setTimeRange(e.target.value)}
-          style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ddd' }}
+          className="progress-stats-select"
         >
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
@@ -237,88 +239,81 @@ function ProgressStats({ habitId, habitName }) {
       </div>
 
       {/* Main Stats Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
-        gap: '15px',
-        marginBottom: '15px'
-      }}>
+      <div className="stats-main-grid">
         {/* Total Completions */}
-        <div style={{ textAlign: 'center', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '6px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1976d2' }}>
+        <div className="stat-card stat-card-completions">
+          <div className="stat-value stat-value-blue">
             {stats.totalCompletions}
           </div>
-          <div style={{ fontSize: '12px', color: '#666' }}>Total Completions</div>
+          <div className="stat-label">Total Completions</div>
         </div>
 
         {/* Completion Percentage */}
-        <div style={{ textAlign: 'center', padding: '10px', backgroundColor: '#e8f5e8', borderRadius: '6px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#388e3c' }}>
+        <div className="stat-card stat-card-percentage">
+          <div className="stat-value stat-value-green">
             {stats.completionPercentage}%
           </div>
-          <div style={{ fontSize: '12px', color: '#666' }}>Completion Rate</div>
+          <div className="stat-label">Completion Rate</div>
         </div>
 
         {/* Current Streak */}
-        <div style={{ textAlign: 'center', padding: '10px', backgroundColor: '#fff3e0', borderRadius: '6px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f57c00' }}>
+        <div className="stat-card stat-card-current-streak">
+          <div className="stat-value stat-value-orange">
             {stats.currentStreak}
           </div>
-          <div style={{ fontSize: '12px', color: '#666' }}>Current Streak</div>
+          <div className="stat-label">Current Streak</div>
         </div>
 
         {/* Best Streak */}
-        <div style={{ textAlign: 'center', padding: '10px', backgroundColor: '#fce4ec', borderRadius: '6px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#c2185b' }}>
+        <div className="stat-card stat-card-best-streak">
+          <div className="stat-value stat-value-pink">
             {stats.bestStreak}
           </div>
-          <div style={{ fontSize: '12px', color: '#666' }}>Best Streak</div>
+          <div className="stat-label">Best Streak</div>
         </div>
       </div>
 
       {/* Weekly & Monthly Comparison */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+      <div className="stats-comparison-grid">
         {/* Weekly Stats */}
-        <div style={{ padding: '10px', backgroundColor: '#f3e5f5', borderRadius: '6px' }}>
-          <h5 style={{ margin: '0 0 8px 0', color: '#7b1fa2' }}>📅 Weekly Progress</h5>
-          <div style={{ fontSize: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+        <div className="comparison-card comparison-card-weekly">
+          <h5>📅 Weekly Progress</h5>
+          <div>
+            <div className="comparison-row">
               <span>This Week:</span>
-              <strong>{stats.weeklyStats.thisWeek} days</strong>
+              <span className="comparison-value">{stats.weeklyStats.thisWeek} days</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className="comparison-row">
               <span>Last Week:</span>
-              <strong>{stats.weeklyStats.lastWeek} days</strong>
+              <span className="comparison-value">{stats.weeklyStats.lastWeek} days</span>
             </div>
-            <div style={{ 
-              fontSize: '12px', 
-              color: stats.weeklyStats.thisWeek >= stats.weeklyStats.lastWeek ? '#4caf50' : '#f44336',
-              marginTop: '4px',
-              textAlign: 'center'
-            }}>
+            <div className={`comparison-trend ${
+              stats.weeklyStats.thisWeek >= stats.weeklyStats.lastWeek 
+                ? 'comparison-trend-positive' 
+                : 'comparison-trend-negative'
+            }`}>
               {stats.weeklyStats.thisWeek >= stats.weeklyStats.lastWeek ? '📈 Improving!' : '📉 Keep pushing!'}
             </div>
           </div>
         </div>
 
         {/* Monthly Stats */}
-        <div style={{ padding: '10px', backgroundColor: '#e0f2f1', borderRadius: '6px' }}>
-          <h5 style={{ margin: '0 0 8px 0', color: '#00695c' }}>📆 Monthly Progress</h5>
-          <div style={{ fontSize: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+        <div className="comparison-card comparison-card-monthly">
+          <h5>📆 Monthly Progress</h5>
+          <div>
+            <div className="comparison-row">
               <span>This Month:</span>
-              <strong>{stats.monthlyStats.thisMonth} days</strong>
+              <span className="comparison-value">{stats.monthlyStats.thisMonth} days</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className="comparison-row">
               <span>Last Month:</span>
-              <strong>{stats.monthlyStats.lastMonth} days</strong>
+              <span className="comparison-value">{stats.monthlyStats.lastMonth} days</span>
             </div>
-            <div style={{ 
-              fontSize: '12px', 
-              color: stats.monthlyStats.thisMonth >= stats.monthlyStats.lastMonth ? '#4caf50' : '#f44336',
-              marginTop: '4px',
-              textAlign: 'center'
-            }}>
+            <div className={`comparison-trend ${
+              stats.monthlyStats.thisMonth >= stats.monthlyStats.lastMonth 
+                ? 'comparison-trend-positive' 
+                : 'comparison-trend-negative'
+            }`}>
               {stats.monthlyStats.thisMonth >= stats.monthlyStats.lastMonth ? '🚀 Great progress!' : '💪 Keep going!'}
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import '../styles/habitCalender.css';
 
-const HabitCalendar = ({ habitId, habitName }) => {
+const HabitCalendar = ({ habitId, habitName, refreshTrigger }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [completions, setCompletions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -55,6 +56,13 @@ const HabitCalendar = ({ habitId, habitName }) => {
     }
   }, [habitId, currentMonth]);
 
+  // Add this new useEffect to listen for refreshTrigger changes
+  useEffect(() => {
+    if (habitId && refreshTrigger) {
+      fetchMonthCompletions();
+    }
+  }, [refreshTrigger]);
+
   // Navigate to previous month
   const goToPreviousMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
@@ -94,157 +102,94 @@ const HabitCalendar = ({ habitId, habitName }) => {
   const calendarDays = generateCalendarDays();
 
   if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Loading calendar...</div>;
+    return (
+      <div className="habit-calendar loading">
+        Loading calendar...
+      </div>
+    );
   }
 
   return (
-    <div style={{ 
-      border: '1px solid #ddd', 
-      borderRadius: '8px', 
-      padding: '20px', 
-      margin: '20px 0',
-      backgroundColor: '#fff'
-    }}>
+    <div className="habit-calendar">
       {/* Calendar Header */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '20px' 
-      }}>
+      <div className="calendar-header">
         <button 
           onClick={goToPreviousMonth}
-          style={{
-            backgroundColor: '#f0f0f0',
-            border: '1px solid #ccc',
-            padding: '8px 12px',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
+          className="calendar-nav-button"
         >
           ← Previous
         </button>
         
-        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>
+        <h3 className="calendar-title">
           {habitName} - {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </h3>
         
         <button 
           onClick={goToNextMonth}
-          style={{
-            backgroundColor: '#f0f0f0',
-            border: '1px solid #ccc',
-            padding: '8px 12px',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
+          className="calendar-nav-button"
         >
           Next →
         </button>
       </div>
 
       {/* Days of week header */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(7, 1fr)', 
-        gap: '2px',
-        marginBottom: '10px'
-      }}>
+      <div className="calendar-weekdays">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} style={{
-            padding: '8px',
-            textAlign: 'center',
-            fontWeight: 'bold',
-            backgroundColor: '#f5f5f5',
-            fontSize: '12px'
-          }}>
+          <div key={day} className="calendar-weekday">
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(7, 1fr)', 
-        gap: '2px'
-      }}>
-        {calendarDays.map((dayData, index) => (
-          <div
-            key={index}
-            style={{
-              minHeight: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #eee',
-              backgroundColor: dayData ? (
-                dayData.isCompleted ? '#4CAF50' : 
-                dayData.isToday ? '#fff3cd' : '#fff'
-              ) : 'transparent',
-              color: dayData ? (
-                dayData.isCompleted ? 'white' : 
-                dayData.isToday ? '#856404' : '#333'
-              ) : 'transparent',
-              fontWeight: dayData && dayData.isToday ? 'bold' : 'normal',
-              fontSize: '14px',
-              position: 'relative'
-            }}
-          >
-            {dayData && (
-              <>
-                {dayData.day}
-                {dayData.isCompleted && (
-                  <span style={{
-                    position: 'absolute',
-                    top: '2px',
-                    right: '4px',
-                    fontSize: '10px'
-                  }}>
-                    ✓
-                  </span>
-                )}
-              </>
-            )}
-          </div>
-        ))}
+      <div className="calendar-grid">
+        {calendarDays.map((dayData, index) => {
+          if (!dayData) {
+            // Empty cell
+            return <div key={index} className="calendar-day empty"></div>;
+          }
+
+          // Determine CSS classes for the day
+          const dayClasses = ['calendar-day'];
+          
+          if (dayData.isCompleted && dayData.isToday) {
+            dayClasses.push('completed', 'today');
+          } else if (dayData.isCompleted) {
+            dayClasses.push('completed');
+          } else if (dayData.isToday) {
+            dayClasses.push('today');
+          } else {
+            dayClasses.push('regular');
+          }
+
+          return (
+            <div
+              key={index}
+              className={dayClasses.join(' ')}
+            >
+              {dayData.day}
+              {dayData.isCompleted && (
+                <span className="calendar-day-check">
+                  ✓
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Legend */}
-      <div style={{ 
-        marginTop: '15px', 
-        display: 'flex', 
-        justifyContent: 'center', 
-        gap: '20px',
-        fontSize: '12px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{
-            width: '15px',
-            height: '15px',
-            backgroundColor: '#4CAF50',
-            borderRadius: '3px'
-          }}></div>
+      <div className="calendar-legend">
+        <div className="legend-item">
+          <div className="legend-color completed"></div>
           <span>Completed</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{
-            width: '15px',
-            height: '15px',
-            backgroundColor: '#fff3cd',
-            border: '1px solid #ffeaa7',
-            borderRadius: '3px'
-          }}></div>
+        <div className="legend-item">
+          <div className="legend-color today"></div>
           <span>Today</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{
-            width: '15px',
-            height: '15px',
-            backgroundColor: '#fff',
-            border: '1px solid #eee',
-            borderRadius: '3px'
-          }}></div>
+        <div className="legend-item">
+          <div className="legend-color regular"></div>
           <span>Not completed</span>
         </div>
       </div>

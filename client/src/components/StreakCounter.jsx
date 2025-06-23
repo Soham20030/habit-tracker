@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import '../styles/streakCounter.css';
 
-const StreakCounter = ({ habitId, habitName }) => {
+const StreakCounter = ({ habitId, habitName, refreshTrigger }) => {
   const [streakData, setStreakData] = useState({
     currentStreak: 0,
     longestStreak: 0,
@@ -121,6 +122,13 @@ const StreakCounter = ({ habitId, habitName }) => {
     }
   }, [habitId]);
 
+  // Add this new useEffect to listen for refreshTrigger changes
+  useEffect(() => {
+    if (habitId && refreshTrigger) {
+      calculateStreaks();
+    }
+  }, [refreshTrigger]);
+
   // Helper function to get streak emoji based on current streak
   const getStreakEmoji = (streak) => {
     if (streak === 0) return '😴';
@@ -156,106 +164,56 @@ const StreakCounter = ({ habitId, habitName }) => {
 
   if (loading) {
     return (
-      <div style={{ 
-        padding: '15px', 
-        textAlign: 'center',
-        backgroundColor: '#f9f9f9',
-        borderRadius: '6px',
-        margin: '10px 0'
-      }}>
+      <div className="streak-counter loading">
         Calculating streaks...
       </div>
     );
   }
 
   return (
-    <div style={{
-      backgroundColor: '#f8f9fa',
-      border: '2px solid #e9ecef',
-      borderRadius: '10px',
-      padding: '15px',
-      margin: '10px 0',
-      textAlign: 'center'
-    }}>
+    <div className="streak-counter">
       {/* Header */}
-      <h4 style={{ 
-        margin: '0 0 15px 0', 
-        color: '#495057',
-        fontSize: '16px'
-      }}>
+      <h4 className="streak-header">
         🔥 Streak Tracker
       </h4>
 
       {/* Main Streak Display */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        marginBottom: '15px'
-      }}>
+      <div className="streak-main-display">
         {/* Current Streak */}
-        <div style={{
-          backgroundColor: streakData.currentStreak > 0 ? '#d4edda' : '#f8d7da',
-          border: `2px solid ${streakData.currentStreak > 0 ? '#c3e6cb' : '#f5c6cb'}`,
-          borderRadius: '8px',
-          padding: '10px',
-          minWidth: '80px'
-        }}>
-          <div style={{ fontSize: '24px', marginBottom: '5px' }}>
+        <div className={`streak-card ${streakData.currentStreak > 0 ? 'current-active' : 'current-inactive'}`}>
+          <span className="streak-emoji">
             {getStreakEmoji(streakData.currentStreak)}
-          </div>
-          <div style={{ 
-            fontSize: '20px', 
-            fontWeight: 'bold',
-            color: streakData.currentStreak > 0 ? '#155724' : '#721c24'
-          }}>
+          </span>
+          <div className={`streak-number ${streakData.currentStreak > 0 ? 'active' : 'inactive'}`}>
             {streakData.currentStreak}
           </div>
-          <div style={{ fontSize: '12px', color: '#6c757d' }}>
+          <div className="streak-label">
             Current Streak
           </div>
         </div>
 
         {/* Best Streak */}
-        <div style={{
-          backgroundColor: '#fff3cd',
-          border: '2px solid #ffeaa7',
-          borderRadius: '8px',
-          padding: '10px',
-          minWidth: '80px'
-        }}>
-          <div style={{ fontSize: '24px', marginBottom: '5px' }}>
+        <div className="streak-card best-streak">
+          <span className="streak-emoji">
             🏆
-          </div>
-          <div style={{ 
-            fontSize: '20px', 
-            fontWeight: 'bold',
-            color: '#856404'
-          }}>
+          </span>
+          <div className="streak-number best">
             {streakData.longestStreak}
           </div>
-          <div style={{ fontSize: '12px', color: '#6c757d' }}>
+          <div className="streak-label">
             Best Streak
           </div>
         </div>
       </div>
 
       {/* Encouraging Message */}
-      <div style={{
-        backgroundColor: '#e2e3e5',
-        borderRadius: '6px',
-        padding: '8px',
-        fontSize: '14px',
-        color: '#495057',
-        fontStyle: 'italic',
-        marginBottom: '10px'
-      }}>
+      <div className="streak-message">
         {getStreakMessage(streakData.currentStreak, streakData.streakBroken)}
       </div>
 
       {/* Last Completed Info */}
       {streakData.lastCompletedDate && (
-        <div style={{ fontSize: '12px', color: '#6c757d' }}>
+        <div className="last-completed">
           Last completed: {new Date(streakData.lastCompletedDate + 'T00:00:00').toLocaleDateString('en-US', {
             weekday: 'short',
             month: 'short',
@@ -265,15 +223,7 @@ const StreakCounter = ({ habitId, habitName }) => {
       )}
 
       {/* Streak Status Indicator */}
-      <div style={{
-        marginTop: '10px',
-        fontSize: '12px',
-        padding: '4px 8px',
-        borderRadius: '4px',
-        display: 'inline-block',
-        backgroundColor: streakData.currentStreak > 0 ? '#d1ecf1' : '#f8d7da',
-        color: streakData.currentStreak > 0 ? '#0c5460' : '#721c24'
-      }}>
+      <div className={`streak-status ${streakData.currentStreak > 0 ? 'active' : 'inactive'}`}>
         {streakData.currentStreak > 0 ? 
           `🔥 ${streakData.currentStreak} day${streakData.currentStreak !== 1 ? 's' : ''} strong!` : 
           '💤 No active streak'

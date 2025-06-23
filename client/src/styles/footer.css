@@ -1,0 +1,261 @@
+/* Rainforest-inspired Footer Styles */
+
+.footer {
+  width: 100vw;
+  background: linear-gradient(135deg, #2E5D2E 0%, #1B4332 100%);
+  color: #E8F5E8;
+  margin-top: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(139, 195, 74, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(76, 175, 80, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-section {
+  grid-column: span 1;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.footer .brand-icon {
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #8BC34A 0%, #4CAF50 100%);
+  padding: 0.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(139, 195, 74, 0.2);
+  transition: all 0.3s ease;
+}
+
+.footer .brand-icon:hover {
+  transform: rotate(-5deg) scale(1.05);
+  box-shadow: 0 6px 24px rgba(139, 195, 74, 0.3);
+}
+
+.footer .brand-text {
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, #8BC34A 0%, #A5D6A7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-description {
+  color: #B8D4B8;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+.footer-title {
+  color: #8BC34A;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  position: relative;
+}
+
+.footer-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: linear-gradient(90deg, #8BC34A, #4CAF50);
+  border-radius: 2px;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-link {
+  color: #B8D4B8;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  position: relative;
+  padding-left: 8px;
+}
+
+.footer-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 2px;
+  background: #8BC34A;
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+.footer-link:hover {
+  color: #8BC34A;
+  padding-left: 16px;
+}
+
+.footer-link:hover::before {
+  width: 12px;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(139, 195, 74, 0.1);
+  border: 1px solid rgba(139, 195, 74, 0.2);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.social-link:hover {
+  background: rgba(139, 195, 74, 0.2);
+  border-color: #8BC34A;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(139, 195, 74, 0.2);
+}
+
+.social-icon {
+  font-size: 1.2rem;
+  filter: grayscale(20%);
+  transition: all 0.3s ease;
+}
+
+.social-link:hover .social-icon {
+  filter: grayscale(0%);
+  transform: scale(1.1);
+}
+
+.footer-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139, 195, 74, 0.3), transparent);
+  margin: 2rem 0 1.5rem;
+}
+
+.footer-bottom-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.copyright {
+  color: #8FA68F;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.footer-bottom-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.footer-bottom-link {
+  color: #8FA68F;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.3s ease;
+}
+
+.footer-bottom-link:hover {
+  color: #8BC34A;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .brand-section {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .footer-bottom-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .footer-bottom-links {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .brand-section {
+    grid-column: span 1;
+  }
+  
+  .footer-container {
+    padding: 2rem 1rem 1rem;
+  }
+  
+  .social-links {
+    justify-content: center;
+  }
+}

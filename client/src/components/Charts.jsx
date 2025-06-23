@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import '../styles/charts.css';
 
-const Charts = ({ habits = [] }) => {
+const Charts = ({ habits = [], habitId, refreshTrigger }) => {
   const [completionsData, setCompletionsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -13,6 +14,13 @@ const Charts = ({ habits = [] }) => {
       fetchCompletionsData();
     }
   }, [habits, selectedTimeRange]);
+
+  // Add this new useEffect to listen for refreshTrigger changes
+  useEffect(() => {
+    if (habits.length > 0 && refreshTrigger) {
+      fetchCompletionsData();
+    }
+  }, [refreshTrigger]);
 
   const fetchCompletionsData = async () => {
     try {
@@ -138,8 +146,8 @@ const Charts = ({ habits = [] }) => {
   };
 
   const renderTrendsChart = () => (
-    <div>
-      <h3>Completion Trends</h3>
+    <div className="chart-section">
+      <h3>📈 Completion Trends</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={completionsData}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -162,7 +170,7 @@ const Charts = ({ habits = [] }) => {
           <Line 
             type="monotone" 
             dataKey="completionRate" 
-            stroke="#2196F3" 
+            stroke="#667eea" 
             strokeWidth={3}
             dot={{ r: 4 }}
             name="Overall Completion Rate"
@@ -172,7 +180,7 @@ const Charts = ({ habits = [] }) => {
               key={habit.id}
               type="monotone"
               dataKey={`habit_${habit.id}`}
-              stroke={['#FF9800', '#9C27B0', '#00BCD4'][index]}
+              stroke={['#48bb78', '#805ad5', '#ed8936'][index]}
               strokeWidth={2}
               dot={{ r: 3 }}
               name={habit.name.length > 20 ? habit.name.substring(0, 20) + '...' : habit.name}
@@ -184,8 +192,8 @@ const Charts = ({ habits = [] }) => {
   );
 
   const renderComparisonChart = () => (
-    <div>
-      <h3>Habit Comparison</h3>
+    <div className="chart-section">
+      <h3>📊 Habit Comparison</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={getHabitComparisonData()}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -217,7 +225,7 @@ const Charts = ({ habits = [] }) => {
           <Legend />
           <Bar 
             dataKey="completionRate" 
-            fill="#4CAF50" 
+            fill="#48bb78" 
             name="Completion Rate (%)"
           />
         </BarChart>
@@ -226,10 +234,10 @@ const Charts = ({ habits = [] }) => {
   );
 
   const renderOverviewChart = () => (
-    <div>
-      <h3>Performance Overview</h3>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px' }}>
-        <div style={{ flex: '1', minWidth: '400px' }}>
+    <div className="chart-section">
+      <h3>🎯 Performance Overview</h3>
+      <div className="overview-container">
+        <div className="overview-chart">
           <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie
@@ -256,26 +264,26 @@ const Charts = ({ habits = [] }) => {
           </ResponsiveContainer>
         </div>
         
-        <div style={{ flex: '1', minWidth: '300px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-          <h4 style={{ margin: '0 0 20px 0', color: '#333' }}>📊 Quick Stats</h4>
+        <div className="overview-stats">
+          <h4>📊 Quick Stats</h4>
           
-          <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: 'white', borderRadius: '5px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Total Days Tracked</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2196F3' }}>{completionsData.length}</div>
+          <div className="stat-card">
+            <div className="stat-label">Total Days Tracked</div>
+            <div className="stat-value primary">{completionsData.length}</div>
           </div>
           
-          <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: 'white', borderRadius: '5px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Average Completion Rate</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#4CAF50' }}>
+          <div className="stat-card">
+            <div className="stat-label">Average Completion Rate</div>
+            <div className="stat-value success">
               {completionsData.length > 0 
                 ? Math.round(completionsData.reduce((sum, day) => sum + day.completionRate, 0) / completionsData.length)
                 : 0}%
             </div>
           </div>
           
-          <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: 'white', borderRadius: '5px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Best Day</div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#FF9800' }}>
+          <div className="stat-card">
+            <div className="stat-label">Best Day</div>
+            <div className="stat-value warning small">
               {completionsData.length > 0
                 ? (() => {
                     const bestDay = completionsData.reduce((best, day) => 
@@ -287,31 +295,23 @@ const Charts = ({ habits = [] }) => {
             </div>
           </div>
           
-          <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: 'white', borderRadius: '5px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Total Habits</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#9C27B0' }}>{habits.length}</div>
+          <div className="stat-card">
+            <div className="stat-label">Total Habits</div>
+            <div className="stat-value secondary">{habits.length}</div>
           </div>
 
           {/* Legend for pie chart */}
-          <div style={{ marginTop: '20px' }}>
-            <h5 style={{ margin: '0 0 10px 0', color: '#333' }}>Categories:</h5>
+          <div className="legend-container">
+            <h5>Categories:</h5>
             {getOverviewData().map((item, index) => (
-              <div key={index} style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                marginBottom: '8px',
-                fontSize: '14px'
-              }}>
-                <div style={{ 
-                  width: '16px', 
-                  height: '16px', 
-                  backgroundColor: item.color, 
-                  marginRight: '10px',
-                  borderRadius: '3px'
-                }}></div>
-                <div style={{ flex: 1 }}>
+              <div key={index} className="legend-item">
+                <div 
+                  className="legend-color"
+                  style={{ backgroundColor: item.color }}
+                ></div>
+                <div className="legend-text">
                   <strong>{item.shortName}:</strong> {item.value} days
-                  <span style={{ color: '#666', marginLeft: '5px' }}>
+                  <span className="legend-percentage">
                     ({completionsData.length > 0 ? ((item.value / completionsData.length) * 100).toFixed(1) : 0}%)
                   </span>
                 </div>
@@ -325,101 +325,68 @@ const Charts = ({ habits = [] }) => {
 
   if (loading) {
     return (
-      <div style={{ 
-        padding: '20px', 
-        textAlign: 'center',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        margin: '20px 0'
-      }}>
-        <p>Loading analytics...</p>
+      <div className="charts-container">
+        <div className="charts-loading">
+          <p>Loading analytics...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ 
-        padding: '20px', 
-        textAlign: 'center',
-        border: '1px solid #f44336',
-        borderRadius: '8px',
-        margin: '20px 0',
-        backgroundColor: '#ffebee'
-      }}>
-        <p style={{ color: '#f44336' }}>Error: {error}</p>
+      <div className="charts-container">
+        <div className="charts-error">
+          <p>Error: {error}</p>
+        </div>
       </div>
     );
   }
 
   if (habits.length === 0) {
     return (
-      <div style={{ 
-        padding: '20px', 
-        textAlign: 'center',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        margin: '20px 0',
-        backgroundColor: '#f9f9f9'
-      }}>
-        <h3>📊 Progress Analytics</h3>
-        <p>Create some habits and start tracking to see your progress charts!</p>
+      <div className="charts-container">
+        <div className="charts-empty">
+          <h3>📊 Progress Analytics</h3>
+          <p>Create some habits and start tracking to see your progress charts!</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      padding: '20px',
-      margin: '20px 0',
-      backgroundColor: '#fff'
-    }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '20px',
-        flexWrap: 'wrap',
-        gap: '10px'
-      }}>
-        <h2 style={{ margin: 0 }}>📊 Progress Analytics</h2>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <select 
-            value={selectedTimeRange} 
-            onChange={(e) => setSelectedTimeRange(e.target.value)}
-            style={{ 
-              padding: '8px 12px', 
-              borderRadius: '4px', 
-              border: '1px solid #ddd' 
-            }}
-          >
-            <option value="7">Last 7 days</option>
-            <option value="14">Last 2 weeks</option>
-            <option value="30">Last 30 days</option>
-            <option value="60">Last 2 months</option>
-            <option value="90">Last 3 months</option>
-          </select>
-          <select 
-            value={chartType} 
-            onChange={(e) => setChartType(e.target.value)}
-            style={{ 
-              padding: '8px 12px', 
-              borderRadius: '4px', 
-              border: '1px solid #ddd' 
-            }}
-          >
-            <option value="trends">Trends</option>
-            <option value="comparison">Comparison</option>
-            <option value="overview">Overview</option>
-          </select>
+    <div className="charts-container">
+      <div className="charts-card">
+        <div className="charts-header">
+          <h2 className="charts-title">📊 Progress Analytics</h2>
+          <div className="charts-controls">
+            <select 
+              value={selectedTimeRange} 
+              onChange={(e) => setSelectedTimeRange(e.target.value)}
+              className="charts-select"
+            >
+              <option value="7">Last 7 days</option>
+              <option value="14">Last 2 weeks</option>
+              <option value="30">Last 30 days</option>
+              <option value="60">Last 2 months</option>
+              <option value="90">Last 3 months</option>
+            </select>
+            <select 
+              value={chartType} 
+              onChange={(e) => setChartType(e.target.value)}
+              className="charts-select"
+            >
+              <option value="trends">📈 Trends</option>
+              <option value="comparison">📊 Comparison</option>
+              <option value="overview">🎯 Overview</option>
+            </select>
+          </div>
         </div>
-      </div>
 
-      {chartType === 'trends' && renderTrendsChart()}
-      {chartType === 'comparison' && renderComparisonChart()}
-      {chartType === 'overview' && renderOverviewChart()}
+        {chartType === 'trends' && renderTrendsChart()}
+        {chartType === 'comparison' && renderComparisonChart()}
+        {chartType === 'overview' && renderOverviewChart()}
+      </div>
     </div>
   );
 };
