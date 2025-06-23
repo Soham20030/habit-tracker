@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import {db} from '../db/db.js';
+import authMiddleware from "../middleware/authMiddleware.js";
 const router = new Router();
 
 
@@ -47,6 +48,21 @@ router.post("/login", async(req,res) => {
         }
     } catch (error) {
         res.status(500).json({message:"Server error while logging in"});
+    }
+});
+
+
+router.get("/profile", authMiddleware, async(req,res) => {
+    try {
+        const userId = req.user.userId;
+        const user = await db.query("SELECT id, username, email FROM habit_users WHERE id = $1",[userId]);
+        if(user.rows.length === 0){
+            return res.status(404).json({message:"User not found"});
+        }
+
+        res.status(200).json(user.rows[0]);
+    } catch (error) {
+        res.status(500).json({message:"Server error while fetching profile"});
     }
 });
 
