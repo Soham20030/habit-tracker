@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/streakCounter.css';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+
 const StreakCounter = ({ habitId, habitName, refreshTrigger }) => {
   const [streakData, setStreakData] = useState({
     currentStreak: 0,
@@ -16,7 +19,7 @@ const StreakCounter = ({ habitId, habitName, refreshTrigger }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:5000/api/completions/${habitId}`, {
+      const response = await fetch(`${BASE_URL}/api/completions/${habitId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

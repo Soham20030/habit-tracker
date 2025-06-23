@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/habitCalender.css';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const HabitCalendar = ({ habitId, habitName, refreshTrigger }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -24,7 +25,7 @@ const HabitCalendar = ({ habitId, habitName, refreshTrigger }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:5000/api/completions/${habitId}`, {
+      const response = await fetch(`${BASE_URL}/api/completions/${habitId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

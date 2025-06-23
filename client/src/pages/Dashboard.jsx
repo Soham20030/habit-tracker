@@ -9,6 +9,8 @@ import '../styles/dashboard.css';
 import Navbar from '../components/Navbar';
 import Footer from "../components/Footer";
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function Dashboard() {
   const {logout} = useContext(AuthContext);
   const navigate = useNavigate();
@@ -44,7 +46,7 @@ function Dashboard() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/habits', {
+      const response = await fetch(`${BASE_URL}/api/habits`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -72,7 +74,7 @@ function Dashboard() {
   const fetchHabits = async() => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch("http://localhost:5000/api/habits", {
+      const response = await fetch(`${BASE_URL}/api/habits`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -94,7 +96,7 @@ function Dashboard() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch("http://localhost:5000/api/auth/profile", {
+      const response = await fetch(`${BASE_URL}/api/auth/profile`, {
         headers:{
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json' 
@@ -119,7 +121,7 @@ function Dashboard() {
       const token = localStorage.getItem('token');
       const today = new Date().toISOString().split('T')[0];
       
-      const response = await fetch(`http://localhost:5000/api/completions`, {
+      const response = await fetch(`${BASE_URL}/api/completions`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -154,7 +156,7 @@ function Dashboard() {
       const today = new Date().toISOString().split('T')[0];
       const currentStatus = completions[habitId] || false;
       
-      const response = await fetch('http://localhost:5000/api/completions', {
+      const response = await fetch(`${BASE_URL}/api/habits/${habitId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -208,7 +210,7 @@ function Dashboard() {
   const saveEdit = async (habitId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/habits/${habitId}`, {
+      const response = await fetch(`${BASE_URL}/api/habits/${habitId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -240,7 +242,7 @@ function Dashboard() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/habits/${habitId}`, {
+      const response = await fetch(`${BASE_URL}/api/habits/${habitId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

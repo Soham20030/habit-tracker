@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import '../styles/charts.css';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const Charts = ({ habits = [], habitId, refreshTrigger }) => {
   const [completionsData, setCompletionsData] = useState([]);
@@ -26,7 +27,7 @@ const Charts = ({ habits = [], habitId, refreshTrigger }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/completions', {
+      const response = await fetch(`${BASE_URL}/api/completions`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

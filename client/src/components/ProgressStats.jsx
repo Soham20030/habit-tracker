@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import '../styles/progressStats.css';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function ProgressStats({ habitId, habitName, refreshTrigger }) {
   const [stats, setStats] = useState({
     totalCompletions: 0,
@@ -39,7 +41,7 @@ function ProgressStats({ habitId, habitName, refreshTrigger }) {
       setError('');
       
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/completions/${habitId}`, {
+      const response = await fetch(`${BASE_URL}/api/completions/${habitId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
