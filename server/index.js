@@ -41,8 +41,9 @@ await setupTables();
 console.log("Adding authRoutes...");
 app.use('/api/auth', authRoutes);
 
-console.log("Adding habitRoutes...");
-app.use('/api', habitRoutes);
+// COMMENT OUT habitRoutes temporarily to test
+// console.log("Adding habitRoutes...");
+// app.use('/api', habitRoutes);
 
 // COMMENT OUT completionRoutes temporarily
 // console.log("Adding completionRoutes...");
