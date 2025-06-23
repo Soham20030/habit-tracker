@@ -1,51 +1,57 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
-import {connectDB, setupTables, db} from "./db/db.js";
+import { connectDB, setupTables, db } from "./db/db.js";
 import authRoutes from './Routes/authRoutes.js';
 import habitRoutes from './Routes/habitRoutes.js';
 import completionRoutes from "./Routes/completionRoutes.js";
 import cors from "cors";
+
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const allowedOrigins = [
+  "https://habit-tracker-8eqs.onrender.com", // deployed frontend
+  "http://localhost:5173"                    // local frontend dev
+];
+
 app.use(cors({
-  origin: [
-    "https://habit-tracker-8eqs.onrender.com", // deployed frontend
-    "http://localhost:5173"                    // local frontend dev
-  ],
+  origin: allowedOrigins,
   credentials: true
 }));
 
-// Add these middleware lines:
-app.use(express.json()); // This parses JSON bodies
-app.use(express.urlencoded({ extended: true })); // This parses form data
+// For preflight OPTIONS requests (very important for CORS)
+app.options('*', cors());
 
+// Body parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Connect to DB
 await connectDB();
 await setupTables();
 
-app.use('/api/auth', authRoutes)
-
+// Routes
+app.use('/api/auth', authRoutes);
 app.use('/api', habitRoutes);
-
 app.use('/api', completionRoutes);
 
+// Test DB route
 app.get("/database", async (req, res) => {
-    try {
-        const data = await db.query("SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = 'public'");
-        res.json(data.rows);    
-    } catch (error) {
-        console.error("error getting the database", error);
-        res.status(500).json({message: "error retriving data"});
-    }
-})
+  try {
+    const data = await db.query("SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = 'public'");
+    return res.status(200).json(data.rows);
+  } catch (error) {
+    return res.status(500).json({ message: "error retrieving data" });
+  }
+});
 
-app.get("/", (req,res) =>{
-    res.send("<h1>Hello World</h1>"); 
-})
+// Root route
+app.get("/", (req, res) => {
+  return res.status(200).send("<h1>Hello World</h1>");
+});
 
-
-
-
+// Start server
 app.listen(PORT, () => {
-    console.log(`Server has started at port: ${PORT}`);
-})
+  console.log(`Server has started at port: ${PORT}`);
+});
