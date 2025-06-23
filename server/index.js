@@ -37,17 +37,10 @@ app.use(express.urlencoded({ extended: true }));
 await connectDB();
 await setupTables();
 
-// TEST: Add routes one by one to find the problematic one
-console.log("Adding authRoutes...");
+// Routes - Mount each router at specific paths
 app.use('/api/auth', authRoutes);
-
-// COMMENT OUT habitRoutes temporarily to test
-// console.log("Adding habitRoutes...");
-// app.use('/api', habitRoutes);
-
-// COMMENT OUT completionRoutes temporarily
-// console.log("Adding completionRoutes...");
-// app.use('/api', completionRoutes);
+app.use('/api', habitRoutes);
+app.use('/api', completionRoutes);
 
 // Test DB route
 app.get("/database", async (req, res) => {
