@@ -1,7 +1,10 @@
 import {useContext, useState, useEffect} from "react";
 import { AuthContext } from "../AuthContext";
 import { useNavigate } from 'react-router-dom';
-
+import HabitCalendar from '../components/HabitCalender';
+import StreakCounter from '../components/StreakCounter';
+import ProgressStats from '../components/ProgressStats';
+import Charts from '../components/Charts';
 
 function Dashboard() {
   const {logout} = useContext(AuthContext);
@@ -259,6 +262,26 @@ const deleteHabit = async (habitId) => {
 return (
  <>
   <h1>Welcome back, {loading ? 'Loading...' : user ? user.username : 'User'}!</h1>
+  
+  {/* Error display */}
+  {error && (
+    <div style={{
+      backgroundColor: '#ffebee',
+      color: '#c62828',
+      padding: '10px',
+      borderRadius: '4px',
+      marginBottom: '20px',
+      border: '1px solid #f44336'
+    }}>
+      {error}
+    </div>
+  )}
+
+  {/* Charts Section - Always visible when there are habits */}
+  {userHabits.length > 0 && (
+    <Charts habits={userHabits} />
+  )}
+
   {userHabits.length > 0 ? (
     <div>
       <h2>Your Habits</h2>
@@ -417,6 +440,9 @@ return (
             </button>
           </div>
         </div>
+        <StreakCounter habitId={habit.id} habitName={habit.name} />
+        <HabitCalendar habitId={habit.id} habitName={habit.name} />
+        <ProgressStats habitId={habit.id} habitName={habit.name} />
       </div>
     )}
   </div>
