@@ -11,8 +11,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
-  "https://habit-tracker-8eqs.onrender.com", // deployed frontend
-  "http://localhost:5173"                    // local frontend dev
+  "https://habit-tracker-frontend-6hb5.onrender.com", // deployed frontend - CORRECTED URL
+  "http://localhost:5173"                              // local frontend dev
 ];
 
 // Add detailed CORS logging
